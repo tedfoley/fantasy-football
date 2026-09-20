@@ -11,7 +11,7 @@ python ff.py leagues
 Leagues (aliases work anywhere `--league` is accepted): `ginger` (832310474,
 10 teams, FAAB 100), `winter` (803340783, 12 teams, FAAB 100), `dalton`
 (1356551957, 8 teams, FAAB 1000). All are H2H, full PPR, no trades.
-Lineup: QB, RB x2, WR x2, TE, FLEX (RB/WR/TE), D/ST, K; 7 bench; IR (1, Dalton 3).
+Lineup: QB, RB x2, WR x2, TE, FLEX (RB/WR/TE; 1, Dalton 3), D/ST, K; 7 bench; IR (1, Dalton 3).
 Slot ids: QB=0 RB=2 WR=4 TE=6 D/ST=16 K=17 BE=20 IR=21 FLEX=23.
 
 Waivers in all three leagues run 24h daily: any player dropped (or who was
