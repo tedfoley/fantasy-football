@@ -104,7 +104,9 @@ teams' RBs, D/ST/K after their stream, injured non-IR-eligible players with
 long timelines, WR5/6 with no path to targets. Never drop someone starting
 this week for an equivalent player.
 
-FAAB bidding (blind): budgets are 100 (ginger, winter) and 1000 (dalton).
+FAAB bidding (blind) applies only to dalton (budget 1000). Ginger and winter use
+waiver priority order, not FAAB — submit claims without --bid; the first claim
+submitted gets the highest sub-order.
 - Must-have league-winner (new every-down RB, etc.): 25–40% of remaining.
 - Solid starter upgrade: 8–15%.
 - Speculative/depth: 1–5%.

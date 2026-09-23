@@ -64,7 +64,8 @@ def cmd_leagues(args):
         row = {
             "league": info["name"], "id": lid, "alias": info.get("alias"),
             "record": f'{rec["wins"]}-{rec["losses"]}' + (f'-{rec["ties"]}' if rec["ties"] else ""),
-            "week": sp, "faabRemaining": budget - spent if budget else None,
+            "week": sp,
+            "faabRemaining": budget - spent if acq.get("isUsingAcquisitionBudget") else None,
             "matchup": opp,
             "waivers": f'{acq.get("waiverHours")}h, processes {acq.get("waiverProcessHour")}:00 '
                        f'on {",".join(d[0] for d in acq.get("waiverProcessDays", []))}',
@@ -201,7 +202,10 @@ def cmd_set_lineup(args):
 def cmd_add(args):
     c = Client(args.season)
     lid, info = resolve_league(args.league)
-    _, sp, team, games = _roster_entries(c, lid, info["teamId"])
+    d, sp, team, games = _roster_entries(c, lid, info["teamId"])
+    if args.bid and not d["settings"]["acquisitionSettings"].get("isUsingAcquisitionBudget"):
+        print("note: league uses waiver priority, not FAAB; ignoring --bid")
+        args.bid = 0
     status = None
     for pl in c.free_agents(lid, sp, limit=200):
         if pl["id"] == args.add:
@@ -217,7 +221,7 @@ def cmd_add(args):
     payload = {"isLeagueManager": False, "teamId": info["teamId"],
                "type": "WAIVER" if waiver else "FREEAGENT",
                "memberId": c.swid, "scoringPeriodId": sp,
-               "executionType": "PROCESS" if waiver else "EXECUTE",
+               "executionType": "EXECUTE",
                "bidAmount": args.bid or 0, "items": items}
     print(f'{"waiver claim" if waiver else "FA add"}: {name} (status={status})'
           + (f', drop {args.drop}' if args.drop else "") + (f', bid {args.bid}' if args.bid else ""))
