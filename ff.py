@@ -84,7 +84,7 @@ def cmd_roster(args):
     sp = d["status"]["currentScoringPeriodId"] if "currentScoringPeriodId" in d["status"] else d["scoringPeriodId"]
     team_id = args.team or info["teamId"]
     team = next(t for t in d["teams"] if t["id"] == team_id)
-    games = nfl_games(args.season)
+    games = nfl_games(args.season, sp)
     rows = [describe_entry(e, sp, games) for e in team["roster"]["entries"]]
     if args.json:
         emit({"league": info["name"], "team": team["name"], "week": sp, "roster": rows}, True)
@@ -99,7 +99,7 @@ def cmd_free_agents(args):
     lid, info = resolve_league(args.league)
     d = c.league(lid, views=["mStatus"])
     sp = d["scoringPeriodId"]
-    games = nfl_games(args.season)
+    games = nfl_games(args.season, sp)
     players = c.free_agents(lid, sp, args.pos, args.limit)
     rows = []
     for pl in players:
@@ -116,7 +116,9 @@ def cmd_free_agents(args):
 
 
 def cmd_schedule(args):
-    games = nfl_games(args.season)
+    lid = int(next(iter(load_leagues())))
+    sp = Client(args.season).league(lid, views=["mStatus"])["scoringPeriodId"]
+    games = nfl_games(args.season, sp)
     seen = set()
     out = []
     for abbr, g in games.items():
@@ -152,7 +154,7 @@ def _roster_entries(c, lid, team_id):
     d = c.league(lid)
     sp = d["scoringPeriodId"]
     team = next(t for t in d["teams"] if t["id"] == team_id)
-    games = nfl_games(c.season)
+    games = nfl_games(c.season, sp)
     return d, sp, team, games
 
 

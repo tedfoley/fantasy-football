@@ -109,9 +109,13 @@ class Client:
         return data.get("transactions", []), data.get("pendingTransactions", [])
 
 
-def nfl_games(season=SEASON):
-    """Current week's NFL games keyed by team abbrev -> {kickoff_et, opponent, name}."""
-    r = requests.get(SCOREBOARD_URL, timeout=15)
+def nfl_games(season=SEASON, week=None):
+    """NFL games for `week` (default: ESPN's current week, which lags the fantasy
+    scoring period until Wednesday) keyed by team abbrev -> {kickoff_et, opponent, name}."""
+    params = {"seasontype": 2}
+    if week:
+        params["week"] = week
+    r = requests.get(SCOREBOARD_URL, params=params, timeout=15)
     r.raise_for_status()
     games = {}
     for ev in r.json().get("events", []):
