@@ -231,6 +231,30 @@ def cmd_add(args):
     print(json.dumps(c.submit_transaction(lid, payload), indent=2)[:2000])
 
 
+def cmd_accept_trade(args):
+    c = Client(args.season)
+    lid, info = resolve_league(args.league)
+    d, sp, team, games = _roster_entries(c, lid, info["teamId"])
+    _, pending = c.transactions(lid)
+    tx = next((t for t in pending if t["id"] == args.id and t["type"] == "TRADE_PROPOSAL"), None)
+    if not tx:
+        raise SystemExit(f"no pending trade proposal {args.id}")
+    names = {}
+    for t in d["teams"]:
+        for e in t["roster"]["entries"]:
+            names[e["playerPoolEntry"]["player"]["id"]] = e["playerPoolEntry"]["player"]["fullName"]
+    for it in tx["items"]:
+        direction = "receive" if it["toTeamId"] == info["teamId"] else "send"
+        print(f'{direction}: {names.get(it["playerId"], it["playerId"])} (team {it["fromTeamId"]} -> {it["toTeamId"]})')
+    payload = {"isLeagueManager": False, "teamId": info["teamId"], "type": "TRADE_ACCEPT",
+               "memberId": c.swid, "scoringPeriodId": sp,
+               "executionType": "EXECUTE", "relatedTransactionId": tx["id"]}
+    if args.dry_run:
+        print(json.dumps(payload, indent=2))
+        return
+    print(json.dumps(c.submit_transaction(lid, payload), indent=2)[:2000])
+
+
 def main():
     ap = argparse.ArgumentParser(prog="ff")
     ap.add_argument("--season", type=int, default=2026)
@@ -250,12 +274,14 @@ def main():
     p.add_argument("--add", type=int, required=True); p.add_argument("--drop", type=int)
     p.add_argument("--bid", type=int); p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("transactions"); p.add_argument("--league", required=True)
+    p = sub.add_parser("accept-trade"); p.add_argument("--league", required=True)
+    p.add_argument("--id", required=True); p.add_argument("--dry-run", action="store_true")
 
     args = ap.parse_args()
     try:
         {"leagues": cmd_leagues, "roster": cmd_roster, "free-agents": cmd_free_agents,
          "schedule": cmd_schedule, "set-lineup": cmd_set_lineup, "add": cmd_add,
-         "transactions": cmd_transactions}[args.cmd](args)
+         "transactions": cmd_transactions, "accept-trade": cmd_accept_trade}[args.cmd](args)
     except ESPNError as e:
         sys.exit(str(e))
 
