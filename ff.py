@@ -147,7 +147,7 @@ def cmd_transactions(args):
         for t in o["transactions"][:20]:
             ts = datetime.fromtimestamp(t["proposedDate"] / 1000, ET).strftime("%m/%d %H:%M")
             items = ", ".join(f'{i["type"]} {i["playerId"]}' for i in t.get("items", []))
-            print(f'{ts} team={t["teamId"]} {t["type"]} {t["status"]} bid={t.get("bidAmount", 0)}: {items}')
+            print(f'{ts} team={t["teamId"]} {t["type"]} {t.get("status", "?")} bid={t.get("bidAmount", 0)}: {items}')
     emit(out, args.json, fmt)
 
 
