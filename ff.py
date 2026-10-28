@@ -206,6 +206,18 @@ def cmd_add(args):
     if args.bid and not d["settings"]["acquisitionSettings"].get("isUsingAcquisitionBudget"):
         print("note: league uses waiver priority, not FAAB; ignoring --bid")
         args.bid = 0
+    if args.add is None:
+        if not args.drop:
+            raise SystemExit("need --add and/or --drop")
+        payload = {"isLeagueManager": False, "teamId": info["teamId"], "type": "ROSTER",
+                   "memberId": c.swid, "scoringPeriodId": sp, "executionType": "EXECUTE",
+                   "items": [{"playerId": args.drop, "type": "DROP", "fromTeamId": info["teamId"]}]}
+        print(f"drop: {args.drop}")
+        if args.dry_run:
+            print(json.dumps(payload, indent=2))
+            return
+        print(json.dumps(c.submit_transaction(lid, payload), indent=2)[:2000])
+        return
     status = None
     for pl in c.free_agents(lid, sp, limit=200):
         if pl["id"] == args.add:
@@ -271,7 +283,7 @@ def main():
     p.add_argument("--move", action="append", required=True, metavar="PID:SLOT")
     p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("add"); p.add_argument("--league", required=True)
-    p.add_argument("--add", type=int, required=True); p.add_argument("--drop", type=int)
+    p.add_argument("--add", type=int); p.add_argument("--drop", type=int)
     p.add_argument("--bid", type=int); p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("transactions"); p.add_argument("--league", required=True)
     p = sub.add_parser("accept-trade"); p.add_argument("--league", required=True)
